@@ -1,0 +1,5 @@
+The SRS project on github is closed. This is the latest code forked, and no major updates
+are expected from the original writer. So although the output contains a warning about being
+unstable and suggests us to use the 1.0 stable release, we think it might be a good idea to
+start with this 2.0 branch. There's also a development branch which heads towards 3.0, but that
+is a bit too much for us (at least 2.0 had few alphas).
