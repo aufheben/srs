@@ -1290,6 +1290,24 @@ int SrsHttpConn::process_request(ISrsHttpResponseWriter* w, ISrsHttpMessage* r)
     srs_trace("HTTP %s %s, content-length=%"PRId64"", 
         r->method_str().c_str(), r->url().c_str(), r->content_length());
     
+    /* <IPED> */
+    if (srs_string_ends_with(r->path(), ".m3u8")) {
+        string root_dir = _srs_config->get_http_stream_dir();
+        string upath = r->path();
+        string fullpath = root_dir + upath;
+
+        if (!srs_path_exists(fullpath)) {
+          for (int i = 0; i < 30; i++) {
+              srs_warn(">> IPED: sleep for 1s and check for %s", fullpath.c_str());
+              st_sleep(1);
+              if (srs_path_exists(fullpath)) {
+                break;
+              }
+          }
+        }
+    }
+    /* </IPED> */
+
     // use default server mux to serve http request.
     if ((ret = http_mux->serve_http(w, r)) != ERROR_SUCCESS) {
         if (!srs_is_client_gracefully_close(ret)) {
