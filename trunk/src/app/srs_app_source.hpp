@@ -580,6 +580,9 @@ public:
     virtual void on_consumer_destroy(SrsConsumer* consumer);
     virtual void set_cache(bool enabled);
     virtual SrsRtmpJitterAlgorithm jitter();
+    /* <IPED> */
+    virtual bool has_consumers(void);
+    /* </IPED> */
 // internal
 public:
     // for edge, when publish edge stream, check the state

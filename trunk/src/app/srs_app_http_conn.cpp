@@ -57,6 +57,10 @@ using namespace std;
 #include <srs_app_http_api.hpp>
 #include <srs_app_utility.hpp>
 
+/* <IPED> */
+#include <srs_app_statistic.hpp>
+/* </IPED> */
+
 #endif
 
 #ifdef SRS_AUTO_HTTP_CORE
@@ -1295,6 +1299,11 @@ int SrsHttpConn::process_request(ISrsHttpResponseWriter* w, ISrsHttpMessage* r)
         string root_dir = _srs_config->get_http_stream_dir();
         string upath = r->path();
         string fullpath = root_dir + upath;
+
+        // 'upath' here is something like "/live/ecm3dsxz.m3u8"
+        // while 'url' in 'req' is something like "/live/ecm3dsxz"
+        SrsStatistic* stat = SrsStatistic::instance();
+        stat->on_stream_access(upath);
 
         if (!srs_path_exists(fullpath)) {
           for (int i = 0; i < 30; i++) {

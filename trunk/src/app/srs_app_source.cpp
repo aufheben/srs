@@ -2237,6 +2237,13 @@ SrsRtmpJitterAlgorithm SrsSource::jitter()
     return jitter_algorithm;
 }
 
+/* <IPED> */
+bool SrsSource::has_consumers(void)
+{
+    return consumers.size() != 0;
+}
+/* </IPED> */
+
 int SrsSource::on_edge_start_publish()
 {
     return publish_edge->on_client_publish();

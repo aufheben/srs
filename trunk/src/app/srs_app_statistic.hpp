@@ -149,6 +149,10 @@ private:
     std::map<int, SrsStatisticClient*> clients;
     // server total kbps.
     SrsKbps* kbps;
+    /* <IPED> */
+private:
+    std::map<std::string, time_t> url_last_access_time;
+    /* </IPED> */
 private:
     SrsStatistic();
     virtual ~SrsStatistic();
@@ -182,6 +186,12 @@ public:
     * when close stream.
     */
     virtual void on_stream_close(SrsRequest* req);
+
+    /* <IPED> */
+    virtual void on_stream_access(std::string url);
+    virtual void on_stream_disconnect(std::string url);
+    virtual bool should_disconnect_stream(std::string url);
+    /* </IPED> */
 public:
     /**
      * when got a client to publish/play stream,

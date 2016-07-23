@@ -343,6 +343,44 @@ void SrsStatistic::on_stream_close(SrsRequest* req)
     stream->close();
 }
 
+/* <IPED> */
+// The camera and Flash player are both considered as clients, but not the HLS
+// player. So we need a way to determine the HLS clients as well (or the last HTTP
+// access). This is done in srs_app_rtmp_conn.cpp, do_publishing.
+void SrsStatistic::on_stream_access(std::string url)
+{
+    time_t t = time(NULL);
+    url_last_access_time[url] = t;
+}
+
+void SrsStatistic::on_stream_disconnect(std::string url)
+{
+    string m3u8 = url + ".m3u8";
+    url_last_access_time.erase(m3u8);
+}
+
+bool SrsStatistic::should_disconnect_stream(std::string url)
+{
+    string m3u8 = url + ".m3u8";
+    time_t now  = time(NULL);
+    time_t last = url_last_access_time[m3u8];
+
+    if (last == 0) {
+        // When key doesn't exist, 0 is returned. This can happen, e.g.,
+        // when a stream is only accessed by Flash
+        url_last_access_time[m3u8] = now; // make it exist
+        return false;
+    } else {
+        if (now - last > 300) {
+            srs_warn("IPED: no HLS access for %li seconds, disconnecting", now - last);
+            return true;
+        } else {
+            return false;
+        }
+    }
+}
+/* </IPED> */
+
 int SrsStatistic::on_client(int id, SrsRequest* req, SrsConnection* conn, SrsRtmpConnType type)
 {
     int ret = ERROR_SUCCESS;

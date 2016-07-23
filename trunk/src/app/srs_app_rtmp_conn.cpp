@@ -832,6 +832,14 @@ int SrsRtmpConn::publishing(SrsSource* source)
         srs_info("start to publish stream %s success", req->stream.c_str());
         ret = do_publishing(source, &trd);
 
+        /* <IPED> */
+        // Ideally we should use req->stream.c_str() which is something like
+        // "ecm3dsxz" as the key for url_last_access_time. However, this is
+        // slightly easier.
+        SrsStatistic* stat = SrsStatistic::instance();
+        stat->on_stream_disconnect(req->get_stream_url());
+        /* </IPED> */
+
         // stop isolate recv thread
         trd.stop();
     }
@@ -901,6 +909,29 @@ int SrsRtmpConn::do_publishing(SrsSource* source, SrsPublishRecvThread* trd)
         } else {
             trd->wait(publish_normal_timeout);
         }
+
+        /* <IPED> */
+        // Here is the place to check how long has the camera been connected
+        // and how many clients it is streaming to
+        srs_warn("IPED: check for Flash consumers and HLS sessions");
+        // This checks for Flash consumers
+        if (!source->has_consumers()) {
+            SrsStatistic* stat = SrsStatistic::instance();
+            if (stat->should_disconnect_stream(req->get_stream_url())) {
+                int cid = source->source_id();
+
+                SrsStatisticClient* client = NULL;
+                if ((client = stat->find_client(cid)) == NULL) {
+                    srs_error("IPED: client id=%d not found when disconnecting", cid);
+                } else {
+                    client->conn->expire();
+                    srs_warn("IPED: disconnect client id=%d", cid);
+                    ret = ERROR_USER_DISCONNECT;
+                    return ret;
+                }
+            }
+        }
+        /* </IPED> */
 
         // check the thread error code.
         if ((ret = trd->error_code()) != ERROR_SUCCESS) {
