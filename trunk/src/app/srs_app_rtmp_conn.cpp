@@ -911,6 +911,7 @@ int SrsRtmpConn::do_publishing(SrsSource* source, SrsPublishRecvThread* trd)
             trd->wait(publish_normal_timeout);
         }
 
+#if 0
         /* <IPED> */
         // Here is the place to check how long has the camera been connected
         // and how many clients it is streaming to
@@ -933,6 +934,7 @@ int SrsRtmpConn::do_publishing(SrsSource* source, SrsPublishRecvThread* trd)
             }
         }
         /* </IPED> */
+#endif
 
         // check the thread error code.
         if ((ret = trd->error_code()) != ERROR_SUCCESS) {
